@@ -1,124 +1,138 @@
-# Static timeline generator
+# 星光Kirarin 活动时间轴
 
-Easily create a static timeline webpage like my [Wikimedia timeline](https://www.mollywhite.net/wikimedia-timeline/). Check out a preview of this sample site, deployed with GitHub Pages: https://molly.github.io/static-timeline-generator/.
+一个粉丝向的静态时间轴，记录 [星光Kirarin](https://space.bilibili.com/3546653883632229)（妖精管理局 · 三光五色）从 2024 年出道到 2026 年的活动、作品与里程碑。
 
-**Contents**
+![星光Kirarin 活动时间轴](src/img/og-image.png)
 
-- [Install](#install)
-- [Customize](#customize)
-  - [Primary content](#primary-content)
-  - [Meta](#meta)
-- [Additional customization](#additional-customization)
-- [Deploy](#deploy)
-  - [GitHub Pages](#github-pages)
-  - [Other services](#other-services)
-- [Responsiveness](#responsiveness)
-- [Browser compatibility](#browser-compatibility)
-- [Under the hood](#under-the-hood)
+## 特性
 
-![Screenshot of a timeline page with dummy content](docs/browser.png)
+- **完整时间轴**：出道、百舰 / 千舰、生日回、二周年、3D 新衣装、联动与作品，共 28 条记录
+- **现代 UI**：品牌色设计系统、双栏交替时间轴、卡片化布局、响应式排版
+- **明暗主题**：跟随系统，也可手动切换并记忆偏好
+- **筛选与搜索**：按分类筛选、按关键词搜索，结果数量实时更新
+- **可分享状态**：筛选条件写入 URL（`?cat=3D&q=生日`），刷新或分享后保持
+- **渐进增强**：无 JavaScript 时仍可阅读完整时间轴
+- **无外部资源**：不依赖 Google Fonts、Font Awesome 或 CDN，图标全部内联
+- **无障碍**：跳过链接、语义化标题、`aria-live` 结果提示、`:focus-visible`、尊重 `prefers-reduced-motion`
 
-## Install
+## 界面预览
 
-Clone this repository, then run `npm install` from the directory.
+![时间轴界面](docs/browser.png)
 
-`npm run-script serve` will build the project and serve the static files locally at http://localhost:8080. `npm run-script build` just runs the build step without starting the development server.
+## 快速开始
 
-## Customize
+要求 Node.js 20 及以上。
 
-Almost all of the content you need to change is in `src/_data/content.js`.
+```bash
+npm install
+npm run dev     # 本地开发，默认 http://localhost:8080
+npm run build   # 生成静态站点到 _site/
+npm run lint    # ESLint（flat config）
+npm run format  # Prettier
+npm test        # lint + build
+```
 
-### Primary content
+## 内容结构
 
-- `header` (HTML, optional): The content to display in the header at the top of the page.
-- `footer` (HTML, optional): The content to display in the footer at the bottom of the page.
-- `entries` (array of objects, **required**): The list of entries to display on the timeline, in the order they should display.
-  - `id` (string, **required**): A unique ID for this timeline entry.
-  - `categories` (array of strings, optional): A list of categories that apply to this entry. These will show up as checkboxes at the top of the page, and allow readers to filter the timeline. They may not contain commas. They can be hyphen or space separated (`sample category` or `sample-category` will both display on the page as `Sample category`). Entries without any categories will always display.
-  - `color` (string, optional): The color of the circle that displays on the timeline line. The options already defined are `green`, `red`, and `grey`. You can define additional colors in `css/custom.css` (see below).
-  - `faicon` (string, optional): The name of a Font Awesome icon to use in the circle on the timeline line. [Explore the options](https://fontawesome.com/v5.15/icons?d=gallery&p=2&s=solid&m=free). This is just the icon name (without the `fa-` prefix). For example: `anchor`.
-  - `datetime` (string, either `datetime` or `date` must be present): A date and time specifier for the item. This can be in [any format that `moment.js` recognizes](https://momentjs.com/docs/#/parsing/string/). I normally do "YYYY-MM-DD HH-SS". If there is no time, only a date, use the `date` parameter instead of `datetime`.
-  - `date` (string, either `datetime` or `date` must be present): A date specifier for the item. "YYYY-MM-DD".
-  - `title` (HTML, **required**): The title of the timeline entry.
-  - `image` (optional): An image to display in the entry
-    - `src` (string, required): A direct URL to the image file to be embedded on the page, or a relative link to an image in this directory (for example `img/filename.png`).
-    - `link` (string, optional): A hyperlink to the page containing the image, if you'd like people to be able to click it to see a larger version, etc.
-    - `alt` (string, optional): [Alt text](https://supercooldesign.co.uk/blog/how-to-write-good-alt-text) describing the image.
-    - `caption` (HTML, optional): A caption describing the image.
-  - `body` (HTML, **required**): The text of the timeline entry. If you want multiple paragraphs, you have to include `<p>` tags yourself; otherwise, it will be added.
-  - `links` (array of objects, optional): An array of links to display at the bottom of the entry.
-    - `href` (string, **required**): The target of the link.
-    - `linkText` (HTML, **required**): Link text.
-    - `extraText` (HTML, optional): Extra HTML to display at the end of the link.
+站点内容集中在 [`src/_data/timeline.js`](src/_data/timeline.js)，页面通过 `timeline.*` 访问。
 
-### Meta
+### 条目字段
 
-- `pageTitle` (string, **required**): The text to go in the `<title>` tag, to set the title of the page in the browser.
-- `pageDescription` (string, optional): Page description to go into [meta](https://www.w3schools.com/tags/tag_meta.asp) tags.
-- `pageAuthor` (string, optinal): Page author to go into [meta](https://www.w3schools.com/tags/tag_meta.asp) tags.
-
-## Additional customization
-
-If you would like to add more color options for the circles on the timeline, you can edit the `src/css/custom.css` file to add your own. You can use [this tool](https://htmlcolorcodes.com/) to pick colors and get their hex color codes. They are defined like so:
-
-```css
-.timeline-icon.yourcolorhere {
-  background-color: #hexcolorcode;
+```js
+{
+  id: 'debut',                 // 唯一锚点 ID
+  date: '2024-06-07',          // YYYY-MM-DD（按 Asia/Shanghai 解析）
+  time: '20:00',               // 可选，24 小时制
+  categories: ['里程碑', '直播'], // 分类，可多选
+  title: '出道回：星光妖精正式降临',
+  body: '支持 <strong>HTML</strong> 的正文；默认会自动包一层 <p>。',
+  icon: 'star',                // 内联 SVG 图标名，见 sprite.ejs
+  color: 'gold',               // 可选，覆盖分类默认色
+  status: 'upcoming',          // 可选，upcoming 会显示「即将到来」样式
+  image: {                     // 可选
+    src: 'img/example.png',
+    link: 'https://example.com',
+    alt: '图片描述',
+    caption: '图片说明'
+  },
+  links: [
+    { label: '萌娘百科', href: 'https://example.com' }
+  ]
 }
 ```
 
-You would then use `color: yourcolorhere` in the content.js file.
+### 其他数据
 
-Replace the images in the `src/img` folder to customize the page [favicon](https://blog.hubspot.com/website/what-is-a-favicon) and [OpenGraph image](https://blog.hubspot.com/marketing/open-graph-tags-facebook-twitter-linkedin).
+- `site`：页面标题、描述、作者
+- `profile`：主页文案、关键数据、外部链接
+- `sources`：资料来源卡片
+- `lastUpdated`：资料截止日期
+- `filters` / `years`：由工具函数自动生成
 
-## Deploy
+### 分类与图标
 
-Once you run `npm run-script buld`, you will see a `_site` directory containing static HTML/CSS/JS files with your site content. You can now use any static site hosting to deploy these files!
+分类的默认颜色与图标定义在 [`src/_data/utilities.js`](src/_data/utilities.js) 的 `CATEGORY_META` 中；新增分类时同时补充：
 
-### GitHub pages
+1. `CATEGORY_META` 中的 `color` / `icon`
+2. `src/css/main.css` 中的 `--c-*` 颜色与 `.color-*` 映射
+3. 如需新图标，在 [`src/_includes/sprite.ejs`](src/_includes/sprite.ejs) 中添加 `<symbol>`
 
-To deploy your static site on GitHub pages (free), create a branch containing the static files in the root directory by running `git subtree push --prefix _site origin gh-pages`. Then you can go to your repository's Settings > Pages options and choose "Deploy from a branch", then select `gh-pages` as the branch.
+## 视觉与代码
 
-<img src="docs/gh-pages-config.png" alt="Github Pages config settings. Under 'Build and deployment', Source is set to 'Deploy from a branch', branch is set to 'gh-pages', and the folder is set to '/ (root)'." width="500"/>
+- **Eleventy 3**（ESM 配置）+ 官方 EJS 插件
+- 原生 CSS 设计令牌（CSS Custom Properties），不再使用 Sass
+- 原生 ES Module 交互脚本，无运行时依赖
+- 日期格式化使用原生 `Intl.DateTimeFormat`，不再需要 moment.js
+- 已移除 normalize.css、classList polyfill、Font Awesome 与外部字体
 
-### Other services
+主要文件：
 
-There are some good tutorials out there for deploying a static site on various other free services. A few are listed below.
+```text
+eleventy.config.js         # Eleventy 3 配置
+eslint.config.js           # ESLint flat config
+src/_data/timeline.js      # 时间轴内容
+src/_data/utilities.js     # 日期、分类、分组工具
+src/_includes/head.ejs     # meta / 主题初始化 / 资源
+src/_includes/sprite.ejs   # 内联 SVG 图标
+src/index.ejs              # 页面模板
+src/css/main.css           # 设计系统与布局
+src/js/site-js.js          # 主题、筛选、搜索、锚点
+src/img/                   # favicon / OG 图及其 SVG 源文件
+```
 
-You can also look for tutorials on how to deploy a site built with [eleventy](https://www.11ty.dev/), since that's what's powering this project. Some webhosting services like Vercel specifically support eleventy in some really handy ways.
+## 部署
 
-- [Netlify](https://www.netlify.com/blog/2016/10/27/a-step-by-step-guide-deploying-a-static-site-or-single-page-app/)
-- [Vercel](https://vercel.com/guides/deploying-eleventy-with-vercel)
-- [Render](https://render.com/)
-  - Create a new Static Site on Render
-  - Set "build command" to `npm run-script build`
-  - Set "publish directory" to `_site`
+```bash
+npm run build
+```
 
-## Responsiveness
+`_site/` 目录包含构建后的静态文件，可部署到任意静态托管。
 
-Timelines will render well on tablets:
+### GitHub Pages
 
-<img src="docs/tablet.png" alt="Screenshot rendered on a tablet device" width="500"/>
+```bash
+git subtree push --prefix _site origin gh-pages
+```
 
-or mobile devices:
+然后在仓库 **Settings → Pages** 中选择 **Deploy from a branch**，分支选 `gh-pages`，目录选 `/ (root)`。
 
-<img src="docs/phone.png" alt="Screenshot rendered on a phone" width="400"/>
+![GitHub Pages 配置](docs/gh-pages-config.png)
 
-## Browser compatibility
+### Netlify / Vercel / Render
 
-This should work well on all modern browsers. IE <9 is not supported.
+- 构建命令：`npm run build`
+- 发布目录：`_site`
 
-Without JavaScript enabled, the page degrades gracefully. However, posts will show in a single-column timeline and filters will not show.
+## 数据来源与声明
 
-## Under the hood
+- [萌娘百科 · 星光Kirarin](https://mzh.moegirl.org.cn/%E6%98%9F%E5%85%89Kirarin)：出道、历程、形象与逸闻
+- [bilibili 个人空间](https://space.bilibili.com/3546653883632229)：粉丝数、投稿、动态
+- [bilibili 直播间 32378653](https://live.bilibili.com/32378653)：直播活动与舰长记录
 
-This project uses
+本站为粉丝整理的非官方时间轴，资料截至 **2026-11-07**，仅供交流与存档；如有错漏欢迎指正。角色形象、名称及相关作品版权归原作者与权利方所有。
 
-- [11ty](https://www.11ty.dev)
-- [EJS](https://ejs.co/)
-- [moment.js](https://momentjs.com/)
-- [FontAwesome](https://fontawesome.com/)
-- [normalize.css](https://github.com/necolas/normalize.css)
-- [classlist-polyfill](https://github.com/eligrey/classList.js)
+## 致谢
 
-It is released under the [MIT license](https://github.com/molly/static-timeline-generator/blob/main/LICENSE).
+本项目基于 Molly White 的 [static-timeline-generator](https://github.com/molly/static-timeline-generator) 重构，原项目以 [MIT License](LICENSE) 发布。
+
+时间轴内容整理、视觉与代码现代化由 AI（DeepSeek）协助完成。

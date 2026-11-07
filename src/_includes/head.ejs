@@ -1,26 +1,43 @@
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title><%= head.title %></title>
-<% if (head.description) { %>
 <meta name="description" content="<%= head.description %>" />
-<% } %> <% if (head.author) { %>
 <meta name="author" content="<%= head.author %>" />
-<% } %>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<link
-  href="https://fonts.googleapis.com/css?family=Roboto+Slab|Hind+Vadodara:400,600"
-  rel="stylesheet"
-  type="text/css"
-/>
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css"
-  integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-/>
-<link rel="stylesheet" href="css/normalize.css" />
+<meta name="color-scheme" content="light dark" />
+<meta name="theme-color" content="#fff8f6" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#141018" media="(prefers-color-scheme: dark)" />
+
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="img/favicon.png" type="image/png" sizes="512x512" />
+<link rel="apple-touch-icon" href="img/favicon.png" />
 <link rel="stylesheet" href="css/main.css" />
-<link rel="icon" type="image/png" href="img/favicon.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="zh_CN" />
+<meta property="og:site_name" content="<%= head.title %>" />
 <meta property="og:title" content="<%= head.title %>" />
-<meta property="og:type" content="article" />
-<meta property="og:image" content="img/og-image.jpg" />
+<meta property="og:description" content="<%= head.description %>" />
+<meta property="og:image" content="img/og-image.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="<%= head.title %>" />
+<meta name="twitter:description" content="<%= head.description %>" />
+<meta name="twitter:image" content="img/og-image.png" />
+
+<script>
+  (() => {
+    const root = document.documentElement;
+    const key = 'kirarin-theme';
+    let stored = null;
+
+    try {
+      stored = localStorage.getItem(key);
+    } catch {
+      /* 隐私模式下 localStorage 可能不可用，回退到系统主题。 */
+    }
+
+    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+    const theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
+
+    root.dataset.theme = theme;
+  })();
+</script>
